@@ -54,6 +54,15 @@ class Database:
             return None
         return User(*user)
 
+    @classmethod
+    def count_users(cls):
+        curr = cls.conn.cursor()
+        query = """SELECT COUNT(*) FROM users;"""
+        with cls.conn:
+            curr.execute(query)
+            counter = curr.fetchone()[0]
+
+        return counter
 class Register(StatesGroup):
     firstname = State()
     lastname = State()
@@ -103,6 +112,10 @@ async def email(message: Message, state:FSMContext):
     await state.clear()
     await message.answer(f"Registratsiya qilganingiz uchun raxmat, botdan foydalanishingiz mumkin😊")
 
+@dp.message(Command("followers"))
+async def followers(message: Message):
+    foydalanuchilar_soni = Database.count_users()
+    await message.answer(f"Foydalanuchilar soni {html.bold(foydalanuchilar_soni)} ta")
 
 async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
